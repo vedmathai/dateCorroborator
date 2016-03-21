@@ -4,11 +4,11 @@ import treetaggerwrapper
 import sparqlQuerypy
 from bs4 import BeautifulSoup
 
-CONSTANTKEYVERBS="die, died, death, born, birth, sworn in"
+CONSTANTKEYVERBS="die, died, death, born, birth, sworn in" #Set of words that if present in the sentence, then don't discard the sentence, we are interested.
 tagger = treetaggerwrapper.TreeTagger(TAGLANG = 'en', TAGDIR = '/home/vedu29/python/Gsoc/treetagger')
 
 
-def jarWrapper(*args):
+def jarWrapper(*args): # The helper function to use the jar file.
     process = Popen(['java', '-jar']+list(args), stdout=PIPE, stderr=PIPE)
     ret=[]
     while process.poll() is None:
@@ -22,15 +22,15 @@ def jarWrapper(*args):
         ret.remove('')
         return ret
 
-def returnProperty(word):
+def returnProperty(word): #helper function to map the verb to a property. This will be small considering the number of date properties in DBpedia.
     if word in ['death', 'die']: return 'http://dbpedia.org/ontology/deathDate'
     if word in ['birth', 'born', 'bear']: return 'http://dbpedia.org/ontology/birthDate'
 
 
-def normalizeAnnotations(sentence):
+def normalizeAnnotations(sentence): # helper function to remove the references annotation, that appear as square brackets at the end of the sentence.
     return re.sub(r'\[[0-9]*\]', ' ', sentence)
 
-def sentenceSplitter(sentence):
+def sentenceSplitter(sentence): # helper regular function to correctly find end of sentences.
     return re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', sentence)
     
 def normaliseResult(result):
@@ -40,20 +40,20 @@ def normaliseResult(result):
         normRes += sentenceSplitter(sent)
     return normRes
 
-def findAndGenericAnnotateTime(sentence):
+def findAndGenericAnnotateTime(sentence): #Replacing heidelTime tagged Timex tags to a generic 'TIME' so that treeTagger can work its magic without hiccups.
     return re.sub('<TIMEX3((?!<TIMEX3).)*</TIMEX3>', 'TIME', sentence)
 
-def treetag(sentence, encoding = None):
+def treetag(sentence, encoding = None): # TreeTagger helper function.
     if encoding != None:
         return treetaggerwrapper.make_tags(tagger.tag_text(unicode(sentence, "utf-8")))
     else:
         return treetaggerwrapper.make_tags(tagger.tag_text(sentence))
 
-def returnKeyverbs():
+def returnKeyverbs(): #formats the key verbs above.
     return '|'.join(verb for verb in CONSTANTKEYVERBS.split(', '))
 
 
-def findSubVerbsTime(tagsentence):
+def findSubVerbsTime(tagsentence): # The main helper function that figures out the subject in the sentence and finds the correct core verbs marked by an '*'
     pos=[]
     pos2=[]
     seenSubject=False

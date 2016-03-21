@@ -90,8 +90,7 @@ def listTimes(sentence):
     return soup.find_all('timex3')
 
 
-def main():
-    args = ['de.unihd.dbs.heideltime.standalone.jar', 'Einstein1']
+def main(args):
     result = jarWrapper(*args)
     for sentence in normaliseResult(result):
         
@@ -141,8 +140,8 @@ if __name__=='__main__':
     args = ['de.unihd.dbs.heideltime.standalone.jar', 'input']
     result = jarWrapper(*args)
     tagger = treetaggerwrapper.TreeTagger(TAGLANG = 'en', TAGDIR = '/home/vedu29/python/Gsoc/treetagger')
-    print 'hi'
-    main()
+    
+    main(args)
             
 
             
