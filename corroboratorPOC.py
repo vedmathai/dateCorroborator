@@ -85,7 +85,7 @@ def lemmatizeMainVerb(item):
             return treetag(verb)[0].lemma
 
 
-def listTimes(sentence):
+def listTimes(sentence): # uses beautiful soup to get the date information.
     soup = BeautifulSoup(sentence, 'html.parser')
     return soup.find_all('timex3')
 
@@ -96,7 +96,7 @@ def main(args):
         
         sent=findAndGenericAnnotateTime(sentence)
     
-        m = re.match(r"(?P<first_part>.*) (?P<predicate>%s) (?P<second_part>.*)"%(returnKeyverbs()), sent)
+        m = re.match(r"(?P<first_part>.*) (?P<predicate>%s) (?P<second_part>.*)"%(returnKeyverbs()), sent) #scans the sentences for this pattern.
         if m!=None:       
 
             left=treetag(m.group('first_part'), "utf-8")
@@ -104,7 +104,7 @@ def main(args):
             right=treetag(m.group('second_part'), "utf-8")
             tagsentence = left + middle + right
 
-            if 'TIME' in m.group('first_part') or 'TIME' in m.group('second_part'):#  Here onwards is to find the subject and verb
+            if 'TIME' in m.group('first_part') or 'TIME' in m.group('second_part'): #Skip sentence if not date details.
 
                 subVerbTime = findSubVerbsTime(tagsentence)
                 for item in subVerbTime:
@@ -113,7 +113,7 @@ def main(args):
                         subject=previousSubject
                     annotate = sparqlQuerypy.findAnnotation(subject)
                     annotatedSubject = annotate[0]['s']['value']
-                    previousSubject = subject
+                    previousSubject = subject  #heuristic that subject of this pronoun is in deed the previous subject, (not well thought through!)
                     verbLemma=lemmatizeMainVerb(item)
                     if verbLemma != None: prop=returnProperty(verbLemma)
 
